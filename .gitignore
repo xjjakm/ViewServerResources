@@ -58,6 +58,3 @@ gradle-app.setting
 **/build/
 run/
 !gradle-wrapper.jar
-gradle
-gradlew.bat
-gradlew
