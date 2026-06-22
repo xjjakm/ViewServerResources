@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
 
-@Mixin(targets = "net/minecraft/client/network/ClientCommonNetworkHandler$ConfirmServerResourcePackScreen")
+@Mixin(targets = "net/minecraft/client/multiplayer/ClientCommonPacketListenerImpl$ConfirmServerResourcePackScreen")
 public interface AccessorConfirmServerResourcePackScreen {
 
     @Accessor(value = "packs")

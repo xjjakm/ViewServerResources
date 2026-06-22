@@ -1,87 +1,132 @@
 package de.shiewk.viewserverresources.screen.elements;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.ScrollableWidget;
-import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.text.Text;
-import org.joml.Matrix3x2fStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class ManageListWidget<T> extends ScrollableWidget {
+public class ManageListWidget<T> extends ObjectSelectionList<ManageListWidget.ManageListEntry<T>> {
     private final List<T> list;
-    private final List<ClickableWidget> elements = new ArrayList<>();
-    public ManageListWidget(TextRenderer renderer, int i, int j, int k, int l, Text text, List<T> list) {
-        super(i, j, k, l, text);
+    private final Font font;
+
+    public ManageListWidget(Font font, int width, int height, int top, int itemHeight, List<T> list) {
+        super(Minecraft.getInstance(), width, height, top, itemHeight);
+        this.font = font;
         this.list = list;
-        refreshElements(renderer);
+        refreshElements();
     }
 
-    private void refreshElements(TextRenderer renderer){
-        elements.clear();
-        int yp = 0;
+    private void refreshElements() {
+        clearEntries();
         for (T t : new ObjectArrayList<>(list)) {
-            yp += 4;
-            final TextWidget tw = new TextWidget(Text.literal(t.toString()), renderer);
-            tw.setHeight(20);
-            tw.setPosition((width - 34) / 2 - (tw.getWidth() / 2), yp);
-            elements.add(tw);
-            elements.add(new ButtonWidget.Builder(Text.literal("x"), btn -> {
-                btn.active = false;
-                list.remove(t);
-                refreshElements(renderer);
-            }).width(20).position(width - 30, yp).build());
-            yp += 20;
+            addEntry(new ManageListEntry<>(t, this));
         }
     }
 
-    @Override
-    protected int getContentsHeightWithPadding() {
-        return list.size() * 24;
+    public void removeItem(T item) {
+        list.remove(item);
+        refreshElements();
     }
 
     @Override
-    protected double getDeltaYPerScroll() {
-        return 10;
+    public int getRowWidth() {
+        return width - 10;
     }
 
-    @Override
-    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        mouseY += (int) getScrollY();
-        Matrix3x2fStack matrices = context.getMatrices();
-        matrices.pushMatrix();
-        matrices.translate(0, (float) -getScrollY());
-        for (ClickableWidget element : elements) {
-            element.render(context, mouseX, mouseY, delta);
+    protected int getScrollbarPosition() {
+        return width - 6;
+    }
+
+    public static class ManageListEntry<T> extends ObjectSelectionList.Entry<ManageListEntry<T>> {
+        private final T item;
+        private final ManageListWidget<T> parent;
+        private int x, y, entryWidth, entryHeight;
+
+        public ManageListEntry(T item, ManageListWidget<T> parent) {
+            this.item = item;
+            this.parent = parent;
         }
-        matrices.popMatrix();
-        drawScrollbar(context, mouseX, mouseY);
-    }
 
-    @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+        @Override
+        public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+            String text = item.toString();
+            int textWidth = parent.font.width(text);
+            int textX = x + (entryWidth - 34) / 2 - textWidth / 2;
+            int textY = y + (entryHeight - 9) / 2;
+            
+            graphics.text(parent.font, FormattedCharSequence.forward(text, net.minecraft.network.chat.Style.EMPTY), textX, textY, hovered ? 0xFFFFFF : 0xA0A0A0, false);
+            
+            int deleteX = x + entryWidth - 22;
+            int deleteY = y + 2;
+            graphics.text(parent.font, FormattedCharSequence.forward("x", net.minecraft.network.chat.Style.EMPTY), deleteX, deleteY, isMouseOverDelete(mouseX, mouseY) ? 0xFF5555 : 0xFF8888, false);
+        }
 
-    }
+        private boolean isMouseOverDelete(double mouseX, double mouseY) {
+            int deleteX = x + entryWidth - 22;
+            int deleteY = y + 2;
+            return mouseX >= deleteX && mouseX < deleteX + 16 && mouseY >= deleteY && mouseY < deleteY + 12;
+        }
 
-    @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
-        double mouseY = click.y();
-        double mouseX = click.x();
+        @Override
+        public void setX(int x) {
+            this.x = x;
+        }
 
-        double mouseYScrolled = mouseY + getScrollY();
-        for (ClickableWidget element : elements) {
-            if (element.isMouseOver(mouseX, mouseYScrolled)){
-                return element.mouseClicked(click, doubled);
+        @Override
+        public void setY(int y) {
+            this.y = y;
+        }
+
+        @Override
+        public int getX() {
+            return x;
+        }
+
+        @Override
+        public int getY() {
+            return y;
+        }
+
+        @Override
+        public int getWidth() {
+            return entryWidth;
+        }
+
+        @Override
+        public int getHeight() {
+            return entryHeight;
+        }
+
+        @Override
+        public ScreenRectangle getRectangle() {
+            return new ScreenRectangle(x, y, entryWidth, entryHeight);
+        }
+
+        @Override
+        public void visitWidgets(java.util.function.Consumer<net.minecraft.client.gui.components.AbstractWidget> widgetVisitor) {
+        }
+
+        @Override
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+            double mouseX = event.x();
+            double mouseY = event.y();
+            if (isMouseOverDelete(mouseX, mouseY)) {
+                parent.removeItem(item);
+                return true;
             }
+            return super.mouseClicked(event, doubleClick);
         }
-        if (super.checkScrollbarDragged(click)) return true;
-        return super.mouseClicked(click, doubled);
+
+        @Override
+        public Component getNarration() {
+            return Component.empty();
+        }
     }
 }

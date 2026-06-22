@@ -1,0 +1,18 @@
+{
+  "gui.viewserverresources.confirmScreen": "确认服务器资源包",
+  "gui.viewserverresources.accept": "接受一次",
+  "gui.viewserverresources.decline": "拒绝一次",
+  "gui.viewserverresources.url": "资源包将从此处下载：%s",
+  "gui.viewserverresources.urls": "资源包将从此处下载：%s",
+  "gui.viewserverresources.alwaysURL": "始终接受此URL",
+  "gui.viewserverresources.alwaysURLs": "始终接受这些URL",
+  "gui.viewserverresources.alwaysHost": "始终接受来自 %s 的资源包",
+  "gui.viewserverresources.viewURL": "查看下载URL",
+  "gui.viewserverresources.viewURLs": "查看下载URL",
+  "gui.viewserverresources.downloading": "正在从 %s 下载服务器资源包",
+  "gui.viewserverresources.config": "配置",
+  "viewserverresources.settings": "ViewServerResources 设置",
+  "viewserverresources.settings.whitelistedURLs": "管理允许的URL",
+  "viewserverresources.settings.whitelistedHosts": "管理允许的资源包主机",
+  "viewserverresources.settings.broadcast": "在聊天中显示下载的资源包URL：%s"
+}

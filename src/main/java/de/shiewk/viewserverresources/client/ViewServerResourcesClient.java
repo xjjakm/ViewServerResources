@@ -7,7 +7,7 @@ import de.shiewk.viewserverresources.event.ScreenListener;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 import java.io.*;
 import java.net.URL;
@@ -91,7 +91,7 @@ public class ViewServerResourcesClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        whitelistFile = new File(MinecraftClient.getInstance().runDirectory.getPath() + "/viewserverresources.json");
+        whitelistFile = new File(Minecraft.getInstance().gameDirectory, "viewserverresources.json");
         ScreenEvents.AFTER_INIT.register(new ScreenListener());
         ClientTickEvents.END_CLIENT_TICK.register(new ChatAnnouncer());
         loadConfig();

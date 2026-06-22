@@ -58,3 +58,6 @@ gradle-app.setting
 **/build/
 run/
 !gradle-wrapper.jar
+
+# Minecraft source files extracted for reference
+net/

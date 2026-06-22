@@ -24,8 +24,8 @@
     "viewserverresources.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=${loader_version}",
-    "fabric": "*",
+    "fabricloader": ">=0.19.2",
+    "fabric-api": "*",
     "minecraft": "~${minecraft_version}"
   }
 }

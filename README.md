@@ -1,3 +1,4 @@
+### this fork add zh_cn language and update Minecraft version to 26.1.2
 # View Server Resources
 A Minecraft mod that allows you to preview server resource pack URLs before downloading them
 

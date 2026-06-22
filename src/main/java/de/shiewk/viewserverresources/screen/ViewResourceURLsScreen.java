@@ -1,11 +1,12 @@
 package de.shiewk.viewserverresources.screen;
 
 import de.shiewk.viewserverresources.event.ScreenListener;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.MultilineTextWidget;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import java.awt.*;
 import java.util.List;
@@ -15,34 +16,34 @@ public class ViewResourceURLsScreen extends Screen {
     private final Screen parent;
     private final List<ScreenListener.PackInfo> infos;
     public ViewResourceURLsScreen(Screen parent, List<ScreenListener.PackInfo> infos) {
-        super(Text.translatable("gui.viewserverresources.viewURL"));
+        super(Component.translatable("gui.viewserverresources.viewURL"));
         this.parent = parent;
         this.infos = infos;
     }
 
     @Override
-    public void close() {
-        assert client != null;
-        client.setScreen(parent);
+    public void onClose() {
+        Minecraft.getInstance().setScreen(parent);
     }
 
     @Override
     protected void init() {
-        addDrawableChild(ButtonWidget.builder(Text.translatable("gui.done"), btn -> this.close())
-                .dimensions(width / 2 - 150, height - 30, 300, 20)
-                .build());
+        Button doneButton = Button.builder(Component.translatable("gui.done"), btn -> this.onClose())
+                .bounds(width / 2 - 150, height - 30, 300, 20)
+                .build();
+        addRenderableWidget(doneButton);
 
-        final MultilineTextWidget text = new MultilineTextWidget(getMessage(), textRenderer);
+        final MultiLineTextWidget text = new MultiLineTextWidget(getMessage(), font);
         text.setCentered(true);
         text.setPosition(width / 2 - (text.getWidth() / 2), height / 2 - (text.getHeight() / 2));
-        addDrawableChild(text);
+        addRenderableWidget(text);
     }
 
-    private Text getMessage(){
-        MutableText msg = Text.empty();
+    private Component getMessage(){
+        MutableComponent msg = Component.empty();
         for (ScreenListener.PackInfo info : infos) {
-            msg = msg.append(Text.literal("\n"+info.url()));
+            msg = msg.append(Component.literal("\n"+info.url()));
         }
-        return Text.translatable(infos.size() == 1 ? "gui.viewserverresources.url" : "gui.viewserverresources.urls", msg).withColor(Color.GREEN.getRGB());
+        return Component.translatable(infos.size() == 1 ? "gui.viewserverresources.url" : "gui.viewserverresources.urls", msg).withColor(Color.GREEN.getRGB());
     }
 }

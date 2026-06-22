@@ -1,13 +1,9 @@
 package de.shiewk.viewserverresources.mixin;
 
-import com.llamalad7.mixinextras.sugar.Local;
 import de.shiewk.viewserverresources.client.ViewServerResourcesClient;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.ClientCommonNetworkHandler;
-import net.minecraft.network.packet.s2c.common.ResourcePackSendS2CPacket;
-import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,24 +16,37 @@ import java.util.UUID;
 
 import static de.shiewk.viewserverresources.ViewServerResourcesMod.LOGGER;
 
-@Mixin(ClientCommonNetworkHandler.class)
+@Mixin(value = ClientCommonPacketListenerImpl.class, priority = 1000)
 public abstract class MixinClientCommonNetworkHandler {
 
-    @Shadow protected abstract Screen createConfirmServerResourcePackScreen(UUID id, URL url, String hash, boolean required, @Nullable Text prompt);
+    @Shadow @Final protected Minecraft minecraft;
 
-    @Shadow @Final protected MinecraftClient client;
-
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/s2c/common/ResourcePackSendS2CPacket;hash()Ljava/lang/String;"), method = "onResourcePackSend", cancellable = true)
-    public void onResourcePackSend(ResourcePackSendS2CPacket packet, CallbackInfo ci, @Local UUID uUID, @Local URL uRL){
+    @Inject(at = @At("HEAD"), method = "handleResourcePackPush", cancellable = true, require = 0)
+    public void onResourcePackPush(ClientboundResourcePackPushPacket packet, CallbackInfo ci){
         if (LOGGER.isDebugEnabled())
-            LOGGER.debug(packet.url());
-        String hash = packet.hash();
-        if (ViewServerResourcesClient.allowedURL(uRL)){
-            this.client.getServerResourcePackProvider().addResourcePack(uUID, uRL, hash);
-        } else {
-            boolean required = packet.required();
-            this.client.setScreen(this.createConfirmServerResourcePackScreen(uUID, uRL, hash, required, packet.prompt().orElse(null)));
+            LOGGER.debug("Received resource pack push: {}", packet.url());
+        
+        URL url = parseResourcePackUrl(packet);
+        if (url == null) {
+            return;
+        }
+        
+        if (ViewServerResourcesClient.allowedURL(url)){
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("URL is whitelisted, auto-downloading");
+            UUID packId = packet.id();
+            String hash = packet.hash();
+            this.minecraft.getDownloadedPackSource().pushPack(packId, url, hash);
             ci.cancel();
+        }
+    }
+    
+    private URL parseResourcePackUrl(ClientboundResourcePackPushPacket packet) {
+        try {
+            return new URL(packet.url());
+        } catch (java.net.MalformedURLException e) {
+            LOGGER.warn("Invalid resource pack URL: {}", packet.url());
+            return null;
         }
     }
 }

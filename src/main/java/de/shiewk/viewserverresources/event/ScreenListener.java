@@ -4,18 +4,15 @@ import de.shiewk.viewserverresources.client.ViewServerResourcesClient;
 import de.shiewk.viewserverresources.mixin.AccessorConfirmScreen;
 import de.shiewk.viewserverresources.mixin.AccessorConfirmServerResourcePackScreen;
 import de.shiewk.viewserverresources.mixin.AccessorConfirmServerResourcePackScreenPack;
+import de.shiewk.viewserverresources.mixin.AccessorScreen;
 import de.shiewk.viewserverresources.screen.ViewResourceURLsScreen;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.client.screen.v1.Screens;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ConfirmScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.GridWidget;
-import net.minecraft.client.gui.widget.SimplePositioningWidget;
-import net.minecraft.client.network.ClientCommonNetworkHandler;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -24,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static de.shiewk.viewserverresources.ViewServerResourcesMod.LOGGER;
+
 public class ScreenListener implements ScreenEvents.AfterInit {
 
     private static final int buttonWidth = 150;
@@ -31,44 +30,47 @@ public class ScreenListener implements ScreenEvents.AfterInit {
     public record PackInfo(UUID id, URL url, String hash){}
 
     @Override
-    public void afterInit(MinecraftClient client, Screen screen, int scaledWidth, int scaledHeight) {
-        if (screen instanceof ConfirmScreen && screen.getClass().getEnclosingClass() == ClientCommonNetworkHandler.class){
-            GridWidget gw = new GridWidget();
-            gw.getMainPositioner().alignHorizontalCenter();
-            gw.getMainPositioner().alignBottom();
-            gw.getMainPositioner().margin(4, 4, 4, 0);
-            final GridWidget.Adder adder = gw.createAdder(2);
-
-            final List<ClickableWidget> buttons = Screens.getButtons(screen);
-
-            final List<PackInfo> infos = getPackInfos((AccessorConfirmServerResourcePackScreen) screen);
-
-            // Really hacky method
-            ClickableWidget[] widgets = buttons.stream().filter(b -> b instanceof ButtonWidget).toList().toArray(ClickableWidget[]::new);
-
-            // Proceed button
-            buttons.remove(widgets[0]);
-            adder.add(widgets[0]);
-
-            // Reject button
-            buttons.remove(widgets[1]);
-            adder.add(widgets[1]);
-
-            for (int i = 2; i < widgets.length; i++) {
-                buttons.remove(widgets[i]);
+    public void afterInit(Minecraft client, Screen screen, int scaledWidth, int scaledHeight) {
+        try {
+            if (!(screen instanceof ConfirmScreen)) {
+                return;
             }
+            
+            if (!isResourcePackScreen(screen)) {
+                return;
+            }
+            
+            final List<PackInfo> infos = getPackInfos((AccessorConfirmServerResourcePackScreen) screen);
+            if (infos.isEmpty()) return;
+            
+            List<Button> buttons = new ArrayList<>();
+            
+            buttons.add(createButton(Component.translatable(infos.size() == 1 ? "gui.viewserverresources.viewURL" : "gui.viewserverresources.viewURLs"), btn -> viewURLs(client, screen, infos)));
+            buttons.add(createButton(Component.translatable(infos.size() == 1 ? "gui.viewserverresources.alwaysURL" : "gui.viewserverresources.alwaysURLs"), btn -> whitelistURLsAndAccept(btn, screen, infos)));
+            buttons.add(createLargeButton(Component.translatable("gui.viewserverresources.alwaysHost", Component.literal(infos.getFirst().url().getHost()).withColor(Color.GREEN.getRGB())), btn -> whitelistHostsAndAccept(btn, screen, infos)));
 
-            adder.add(createButton(Text.translatable(infos.size() == 1 ? "gui.viewserverresources.viewURL" : "gui.viewserverresources.viewURLs"), btn -> viewURLs(client, screen, infos)));
-            adder.add(createButton(Text.translatable(infos.size() == 1 ? "gui.viewserverresources.alwaysURL" : "gui.viewserverresources.alwaysURLs"), btn -> whitelistURLsAndAccept(btn, screen, infos)));
-            adder.add(createLargeButton(Text.translatable("gui.viewserverresources.alwaysHost", Text.literal(infos.getFirst().url().getHost()).withColor(Color.GREEN.getRGB())), btn -> whitelistHostsAndAccept(btn, screen, infos)), 2);
-
-            gw.refreshPositions();
-            SimplePositioningWidget.setPos(gw, 0, 0, scaledWidth, scaledHeight, 0.5F, 0.85F);
-            gw.forEachChild(buttons::add);
+            int y = scaledHeight - 30 - 24 * buttons.size();
+            for (Button btn : buttons) {
+                btn.setPosition((scaledWidth - btn.getWidth()) / 2, y);
+                ((AccessorScreen) screen).callAddWidget(btn);
+                y += 24;
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to add buttons to resource pack screen (compatibility mode)", e);
         }
     }
 
-    private void whitelistURLsAndAccept(ButtonWidget btn, Screen screen, List<PackInfo> infos){
+    private boolean isResourcePackScreen(Screen screen) {
+        try {
+            Class<?> screenClass = screen.getClass();
+            String className = screenClass.getName();
+            return className.contains("ResourcePack") || className.contains("ConfirmServerResourcePack");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void whitelistURLsAndAccept(Button btn, Screen screen, List<PackInfo> infos){
         btn.active = false;
         for (PackInfo info : infos) {
             ViewServerResourcesClient.addWhitelistURL(info.url());
@@ -78,10 +80,14 @@ public class ScreenListener implements ScreenEvents.AfterInit {
     }
 
     private void accept(Screen screen){
-        ((AccessorConfirmScreen) screen).getCallback().accept(true);
+        try {
+            ((AccessorConfirmScreen) screen).getCallback().accept(true);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to accept resource pack (compatibility mode)", e);
+        }
     }
 
-    private void whitelistHostsAndAccept(ButtonWidget btn, Screen screen, List<PackInfo> infos){
+    private void whitelistHostsAndAccept(Button btn, Screen screen, List<PackInfo> infos){
         btn.active = false;
         for (PackInfo info : infos) {
             ViewServerResourcesClient.addWhitelistHost(info.url());
@@ -90,25 +96,33 @@ public class ScreenListener implements ScreenEvents.AfterInit {
         accept(screen);
     }
 
-    private void viewURLs(MinecraftClient client, Screen screen, List<PackInfo> infos) {
-        client.setScreen(new ViewResourceURLsScreen(screen, infos));
+    private void viewURLs(Minecraft client, Screen screen, List<PackInfo> infos) {
+        try {
+            client.setScreen(new ViewResourceURLsScreen(screen, infos));
+        } catch (Exception e) {
+            LOGGER.warn("Failed to open URL view screen", e);
+        }
     }
 
     private static @NotNull List<PackInfo> getPackInfos(AccessorConfirmServerResourcePackScreen screen) {
         final List<PackInfo> infos = new ArrayList<>();
-        final List<?> packs = screen.getPacks();
-        for (Object packObj : packs) {
-            AccessorConfirmServerResourcePackScreenPack pack = (AccessorConfirmServerResourcePackScreenPack) packObj;
-            infos.add(new PackInfo(pack.getId(), pack.getURL(), pack.getHash()));
+        try {
+            final List<?> packs = screen.getPacks();
+            for (Object packObj : packs) {
+                AccessorConfirmServerResourcePackScreenPack pack = (AccessorConfirmServerResourcePackScreenPack) packObj;
+                infos.add(new PackInfo(pack.getId(), pack.getURL(), pack.getHash()));
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to get pack info", e);
         }
         return infos;
     }
 
-    private ButtonWidget createButton(Text m, ButtonWidget.PressAction action){
-        return ButtonWidget.builder(m, action).width(buttonWidth).build();
+    private Button createButton(Component m, Button.OnPress action){
+        return Button.builder(m, action).width(buttonWidth).build();
     }
 
-    private ButtonWidget createLargeButton(Text m, ButtonWidget.PressAction action){
-        return ButtonWidget.builder(m, action).width(buttonWidth*2+8).build();
+    private Button createLargeButton(Component m, Button.OnPress action){
+        return Button.builder(m, action).width(buttonWidth*2+8).build();
     }
 }
