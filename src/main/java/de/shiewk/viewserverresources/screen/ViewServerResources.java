@@ -26,7 +26,7 @@ public class ViewServerResources extends Screen {
         if (cfgDirty){
             ViewServerResourcesClient.saveConfig();
         }
-        Minecraft.getInstance().setScreen(parent);
+        Minecraft.getInstance().setScreenAndShow(parent);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class ViewServerResources extends Screen {
         Button urlBtn = createButton(Component.translatable("viewserverresources.settings.whitelistedURLs"), btn -> {
             btn.active = false;
             cfgDirty = true;
-            Minecraft.getInstance().setScreen(new ManageListScreen<>(Component.translatable("viewserverresources.settings.whitelistedURLs"), this, ViewServerResourcesClient.getWhitelistedURLs()));
+            Minecraft.getInstance().setScreenAndShow(new ManageListScreen<>(Component.translatable("viewserverresources.settings.whitelistedURLs"), this, ViewServerResourcesClient.getWhitelistedURLs()));
         });
         urlBtn.setPosition((width - buttonWidth * 2 - 8) / 2, y);
         addRenderableWidget(urlBtn);
@@ -62,7 +62,7 @@ public class ViewServerResources extends Screen {
         Button hostBtn = createButton(Component.translatable("viewserverresources.settings.whitelistedHosts"), btn -> {
             btn.active = false;
             cfgDirty = true;
-            Minecraft.getInstance().setScreen(new ManageListScreen<>(Component.translatable("viewserverresources.settings.whitelistedHosts"), this, ViewServerResourcesClient.getWhitelistedHosts()));
+            Minecraft.getInstance().setScreenAndShow(new ManageListScreen<>(Component.translatable("viewserverresources.settings.whitelistedHosts"), this, ViewServerResourcesClient.getWhitelistedHosts()));
         });
         hostBtn.setPosition((width + 8) / 2, y);
         addRenderableWidget(hostBtn);

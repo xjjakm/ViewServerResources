@@ -4,7 +4,12 @@
   "version": "${version}",
   "name": "ViewServerResources",
   "description": "Allows you to view server resource pack URLs before downloading them",
-  "authors": [],
+  "authors": [
+    "Shiewk",
+    "chxjj"
+  ],
+  "sources": "https://github.com/xjjakm/ViewServerResources",
+  "issues": "https://github.com/xjjakm/ViewServerResources/issues",
   "contact": {},
   "license": "Apache-2.0",
   "icon": "assets/viewserverresources/icon.png",
@@ -24,7 +29,7 @@
     "viewserverresources.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.19.2",
+    "fabricloader": ">=0.19.3",
     "fabric-api": "*",
     "minecraft": "~${minecraft_version}"
   }

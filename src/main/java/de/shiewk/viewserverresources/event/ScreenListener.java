@@ -9,7 +9,6 @@ import de.shiewk.viewserverresources.screen.ViewResourceURLsScreen;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -98,7 +97,7 @@ public class ScreenListener implements ScreenEvents.AfterInit {
 
     private void viewURLs(Minecraft client, Screen screen, List<PackInfo> infos) {
         try {
-            client.setScreen(new ViewResourceURLsScreen(screen, infos));
+            client.setScreenAndShow(new ViewResourceURLsScreen(screen, infos));
         } catch (Exception e) {
             LOGGER.warn("Failed to open URL view screen", e);
         }
@@ -107,7 +106,7 @@ public class ScreenListener implements ScreenEvents.AfterInit {
     private static @NotNull List<PackInfo> getPackInfos(AccessorConfirmServerResourcePackScreen screen) {
         final List<PackInfo> infos = new ArrayList<>();
         try {
-            final List<?> packs = screen.getPacks();
+            final List<?> packs = screen.getRequests();
             for (Object packObj : packs) {
                 AccessorConfirmServerResourcePackScreenPack pack = (AccessorConfirmServerResourcePackScreenPack) packObj;
                 infos.add(new PackInfo(pack.getId(), pack.getURL(), pack.getHash()));

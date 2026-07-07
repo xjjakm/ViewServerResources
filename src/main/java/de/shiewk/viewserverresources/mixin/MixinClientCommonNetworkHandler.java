@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.UUID;
 
@@ -43,8 +44,8 @@ public abstract class MixinClientCommonNetworkHandler {
     
     private URL parseResourcePackUrl(ClientboundResourcePackPushPacket packet) {
         try {
-            return new URL(packet.url());
-        } catch (java.net.MalformedURLException e) {
+            return new URI(packet.url()).toURL();
+        } catch (java.net.URISyntaxException | java.net.MalformedURLException e) {
             LOGGER.warn("Invalid resource pack URL: {}", packet.url());
             return null;
         }
