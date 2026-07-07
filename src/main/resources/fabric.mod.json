@@ -8,9 +8,11 @@
     "Shiewk",
     "chxjj"
   ],
-  "sources": "https://github.com/xjjakm/ViewServerResources",
-  "issues": "https://github.com/xjjakm/ViewServerResources/issues",
-  "contact": {},
+  "contact": {
+    "homepage": "https://github.com/xjjakm/ViewServerResources",
+    "sources": "https://github.com/xjjakm/ViewServerResources",
+    "issues": "https://github.com/xjjakm/ViewServerResources/issues"
+  },
   "license": "Apache-2.0",
   "icon": "assets/viewserverresources/icon.png",
   "environment": "client",
