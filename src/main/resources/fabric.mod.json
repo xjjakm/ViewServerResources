@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "viewserverresources",
-  "version": "${version}",
+  "version": "1.0.6-26.2+",
   "name": "ViewServerResources",
   "description": "Allows you to view server resource pack URLs before downloading them",
   "authors": [
@@ -31,8 +31,8 @@
     "viewserverresources.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.19.3",
+    "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
-    "minecraft": "~${minecraft_version}"
+    "minecraft": ">=26.2"
   }
 }

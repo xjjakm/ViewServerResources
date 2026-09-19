@@ -14,5 +14,6 @@
   "viewserverresources.settings": "ViewServerResources 设置",
   "viewserverresources.settings.whitelistedURLs": "管理允许的URL",
   "viewserverresources.settings.whitelistedHosts": "管理允许的资源包主机",
-  "viewserverresources.settings.broadcast": "在聊天中显示下载的资源包URL：%s"
+  "viewserverresources.settings.broadcast": "在聊天中显示下载的资源包URL：%s",
+  "modmenu.descriptionTranslation.viewserverresources": "允许在下载服务器资源包之前查看其 URL"
 }

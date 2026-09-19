@@ -1,4 +1,4 @@
-### this fork add zh_cn language and update Minecraft version to 26.1.2-26.2,For compatibility,The interface for downloading the resource pack might not work or could be overwritten
+### this fork add zh_cn language and update Minecraft version to 26.1.2-26.3
 # View Server Resources
 A Minecraft mod that allows you to preview server resource pack URLs before downloading them
 

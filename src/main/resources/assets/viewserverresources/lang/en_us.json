@@ -14,5 +14,6 @@
   "viewserverresources.settings": "ViewServerResources Settings",
   "viewserverresources.settings.whitelistedURLs": "Manage allowed URLs",
   "viewserverresources.settings.whitelistedHosts": "Manage allowed pack hosts",
-  "viewserverresources.settings.broadcast": "Show downloaded pack URLs in chat: %s"
+  "viewserverresources.settings.broadcast": "Show downloaded pack URLs in chat: %s",
+  "modmenu.descriptionTranslation.viewserverresources": "Allows you to view server resource pack URLs before downloading them"
 }

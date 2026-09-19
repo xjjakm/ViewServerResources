@@ -4,9 +4,9 @@ import de.shiewk.viewserverresources.client.ViewServerResourcesClient;
 import de.shiewk.viewserverresources.mixin.AccessorConfirmScreen;
 import de.shiewk.viewserverresources.mixin.AccessorConfirmServerResourcePackScreen;
 import de.shiewk.viewserverresources.mixin.AccessorConfirmServerResourcePackScreenPack;
-import de.shiewk.viewserverresources.mixin.AccessorScreen;
 import de.shiewk.viewserverresources.screen.ViewResourceURLsScreen;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -51,7 +51,7 @@ public class ScreenListener implements ScreenEvents.AfterInit {
             int y = scaledHeight - 30 - 24 * buttons.size();
             for (Button btn : buttons) {
                 btn.setPosition((scaledWidth - btn.getWidth()) / 2, y);
-                ((AccessorScreen) screen).callAddWidget(btn);
+                Screens.getWidgets(screen).add(btn);
                 y += 24;
             }
         } catch (Exception e) {
@@ -63,7 +63,9 @@ public class ScreenListener implements ScreenEvents.AfterInit {
         try {
             Class<?> screenClass = screen.getClass();
             String className = screenClass.getName();
-            return className.contains("ResourcePack") || className.contains("ConfirmServerResourcePack");
+            return className.contains("ResourcePack")
+                    || className.contains("ConfirmServerResourcePack")
+                    || className.contains("PackConfirmScreen");
         } catch (Exception e) {
             return false;
         }

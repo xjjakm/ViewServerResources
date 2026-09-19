@@ -14,5 +14,6 @@
   "viewserverresources.settings": "ViewServerResources Einstellungen",
   "viewserverresources.settings.whitelistedURLs": "Erlaubte URLs verwalten",
   "viewserverresources.settings.whitelistedHosts": "Erlaubte Hosts verwalten",
-  "viewserverresources.settings.broadcast": "Heruntergeladene URLs im Chat anzeigen: %s"
+  "viewserverresources.settings.broadcast": "Heruntergeladene URLs im Chat anzeigen: %s",
+  "modmenu.descriptionTranslation.viewserverresources": "Ermöglicht es Ihnen, die URLs von Server-Resource-Packs vor dem Herunterladen anzusehen"
 }
